@@ -1,5 +1,6 @@
-"""Pipeline de vendas: join de vendas.csv com lojas.csv e pivot regiao x mes."""
+"""Pipeline de vendas: join de vendas.csv com lojas.csv, pivot regiao x mes e index.html."""
 import csv
+import json
 from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parent
@@ -8,6 +9,7 @@ LOJAS = RAIZ / "lojas.csv"
 VENDAS_LOJAS = RAIZ / "vendas_lojas.csv"
 VENDAS_ORFAS = RAIZ / "vendas_orfas.csv"
 PIVOT_RECEITA = RAIZ / "pivot_receita.csv"
+INDEX_HTML = RAIZ / "index.html"
 MESES = ["2026-01", "2026-02", "2026-03", "2026-04", "2026-05", "2026-06"]
 
 
@@ -63,6 +65,65 @@ def escrever_pivot(caminho, pivot):
             w.writerow([regiao] + [f"{meses[m]:.2f}" for m in MESES])
 
 
+def ler_pivot(caminho=PIVOT_RECEITA):
+    """Le pivot_receita.csv como dict regiao -> lista de floats na ordem de MESES."""
+    return {l["regiao"]: [float(l[m]) for m in MESES] for l in ler_csv(caminho)}
+
+
+def brl(valor):
+    """Formata numero como R$ 1.234,56."""
+    return "R$ " + f"{valor:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+
+
+def conclusao(pivot, orfas, lojas_sem_vendas):
+    totais = {r: sum(v) for r, v in pivot.items()}
+    lider = max(totais, key=totais.get)
+    total = sum(totais.values())
+    orfas_total = sum(v["receita_brl"] for v in orfas)
+    ids_orfas = ", ".join(sorted({v["id_loja"] for v in orfas}))
+    sem_vendas = "; ".join(f"loja {l['id_loja']} ({l['nome_loja']}/{l['uf']}, regiao {l['regiao']})"
+                           for l in lojas_sem_vendas)
+    regioes_afetadas = sorted({l["regiao"] for l in lojas_sem_vendas})
+    texto = (
+        f"No primeiro semestre de 2026 a receita somou {brl(total)} e a regiao lider foi o {lider}, "
+        f"com {brl(totais[lider])}. Ficaram fora da analise {len(orfas)} vendas ({brl(orfas_total)}) "
+        f"registradas com loja inexistente (id_loja {ids_orfas}), que nao puderam ser atribuidas a nenhuma regiao."
+    )
+    if lojas_sem_vendas:
+        texto += (
+            f" Alem disso, a {sem_vendas} nao teve vendas no periodo, entao o "
+            f"{', '.join(regioes_afetadas)} aparece menor que a operacao real da regiao."
+        )
+    return texto
+
+
+def gerar_html(caminho, pivot, orfas, lojas_sem_vendas):
+    datasets = [{"label": r, "data": [round(v, 2) for v in valores]} for r, valores in pivot.items()]
+    html = f"""<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Receita mensal por regiao - 1o semestre 2026</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<style>body{{font-family:system-ui,sans-serif;max-width:900px;margin:2rem auto;padding:0 1rem;line-height:1.5}}</style>
+</head>
+<body>
+<h1>Receita mensal por regiao (R$)</h1>
+<canvas id="grafico"></canvas>
+<p>{conclusao(pivot, orfas, lojas_sem_vendas)}</p>
+<script>
+new Chart(document.getElementById("grafico"), {{
+  type: "line",
+  data: {{ labels: {json.dumps(MESES)}, datasets: {json.dumps(datasets, ensure_ascii=False)} }},
+  options: {{ scales: {{ y: {{ beginAtZero: true }} }} }}
+}});
+</script>
+</body>
+</html>
+"""
+    caminho.write_text(html, encoding="utf-8")
+
+
 def main():
     vendas = ler_vendas()
     lojas = ler_lojas()
@@ -72,6 +133,9 @@ def main():
     escrever_csv(VENDAS_LOJAS, juntas, colunas_vendas + colunas_lojas)
     escrever_csv(VENDAS_ORFAS, orfas, colunas_vendas)
     escrever_pivot(PIVOT_RECEITA, pivotar(juntas))
+    ids_com_venda = {v["id_loja"] for v in juntas}
+    lojas_sem_vendas = [l for i, l in lojas.items() if i not in ids_com_venda]
+    gerar_html(INDEX_HTML, ler_pivot(), orfas, lojas_sem_vendas)
     return juntas, orfas
 
 

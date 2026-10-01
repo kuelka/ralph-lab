@@ -9,6 +9,7 @@ Started: Wed Sep 30 21:45:10     2026
 - id_loja e comparado como string (DictReader); receita_brl convertido para float em ler_vendas()
 - Rodar testes: `python -m pytest -q` na raiz (Python 3.13)
 - MESES (lista de "AAAA-MM") e PIVOT_RECEITA ficam em pipeline.py; pivotar() devolve dict regiao->mes->float sem arredondar (arredonda so em escrever_pivot)
+- index.html e gerado por gerar_html() a partir de ler_pivot() (le pivot_receita.csv); textos da conclusao sao derivados dos dados (lider, orfas, lojas sem vendas), nada hardcoded
 ---
 
 ## 2026-09-30 21:50 - US-001
@@ -27,4 +28,15 @@ Started: Wed Sep 30 21:45:10     2026
   - Mes = v["data"][:7]; 70 vendas por mes no join
   - Totais por regiao: Sudeste 265077.49 (lider), Nordeste ~261862.76, Centro-Oeste ~258323.97, Sul ~146009.84
   - Para US-003, index.html pode ler pivot_receita.csv (criterio exige gerar a partir dele) depois de escrever_pivot em main()
+---
+
+## 2026-09-30 22:10 - US-003
+- pipeline.py: ler_pivot(), brl(), conclusao(), gerar_html() -> index.html com Chart.js (CDN, line, 4 series x 6 meses, dados embutidos) e um unico <p> de conclusao (~380 chars)
+- Conclusao derivada dos dados: lider Sudeste, 3 orfas R$ 8.120,00 (id 999), loja 108 Batel/PR sem vendas -> Sul menor
+- Teste novo de canvas/Chart.js/paragrafo; 7 testes verdes
+- Files changed: pipeline.py, tests/test_pipeline.py, index.html, scripts/ralph/prd.json, scripts/ralph/progress.txt
+- Verificacao manual no navegador pendente (sem ferramenta de browser nesta iteracao)
+- **Learnings for future iterations:**
+  - brl() formata no padrao brasileiro (R$ 8.120,00) trocando separadores do format ingles
+  - Lojas sem vendas = ids de lojas.csv ausentes no join
 ---

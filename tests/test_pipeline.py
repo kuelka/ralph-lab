@@ -58,3 +58,13 @@ def test_pivot_totais(saida):
     assert total == pytest.approx(931274.06, abs=0.50)
     sudeste = next(l for l in pivot if l["regiao"] == "Sudeste")
     assert sum(float(sudeste[m]) for m in pipeline.MESES) == pytest.approx(265077.49, abs=0.50)
+
+
+def test_index_html_grafico_e_conclusao(saida):
+    html = pipeline.INDEX_HTML.read_text(encoding="utf-8")
+    assert "<canvas" in html and "chart.js" in html.lower()
+    paragrafos = re.findall(r"<p>(.*?)</p>", html, re.S)
+    assert len(paragrafos) == 1
+    texto = paragrafos[0]
+    assert len(texto) >= 300
+    assert "Sudeste" in texto and "R$ 8.120,00" in texto and "108" in texto and "Batel" in texto

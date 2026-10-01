@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Receita mensal por regiao - 1o semestre 2026</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<style>body{font-family:system-ui,sans-serif;max-width:900px;margin:2rem auto;padding:0 1rem;line-height:1.5}</style>
+</head>
+<body>
+<h1>Receita mensal por regiao (R$)</h1>
+<canvas id="grafico"></canvas>
+<p>No primeiro semestre de 2026 a receita somou R$ 931.274,06 e a regiao lider foi o Sudeste, com R$ 265.077,49. Ficaram fora da analise 3 vendas (R$ 8.120,00) registradas com loja inexistente (id_loja 999), que nao puderam ser atribuidas a nenhuma regiao. Alem disso, a loja 108 (Batel/PR, regiao Sul) nao teve vendas no periodo, entao o Sul aparece menor que a operacao real da regiao.</p>
+<script>
+new Chart(document.getElementById("grafico"), {
+  type: "line",
+  data: { labels: ["2026-01", "2026-02", "2026-03", "2026-04", "2026-05", "2026-06"], datasets: [{"label": "Centro-Oeste", "data": [44144.42, 48227.94, 41682.96, 38855.88, 46672.07, 38740.7]}, {"label": "Nordeste", "data": [46222.85, 48042.96, 45850.7, 44053.04, 35371.5, 42321.71]}, {"label": "Sudeste", "data": [44767.33, 48544.11, 35816.56, 46281.64, 41083.43, 48584.42]}, {"label": "Sul", "data": [27703.36, 24985.87, 19584.52, 22976.51, 25094.42, 25665.16]}] },
+  options: { scales: { y: { beginAtZero: true } } }
+});
+</script>
+</body>
+</html>

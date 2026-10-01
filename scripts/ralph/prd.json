@@ -48,7 +48,7 @@
         "python -m pytest -q passa com pelo menos 4 testes no total"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "notes": ""
     }
   ]
