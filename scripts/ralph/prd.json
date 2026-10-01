@@ -1,0 +1,55 @@
+{
+  "project": "ralph-lab",
+  "branchName": "main",
+  "description": "Pipeline Python que faz o inner join de vendas.csv com lojas.csv, calcula a receita por regiao x mes e publica index.html com grafico Chart.js e conclusao. Criterio de pronto global: python -m pytest -q verde com pelo menos 4 testes; 420 linhas no join; receita total 931274.06; Sudeste lider com 265077.49. Restricoes: nao apagar nem editar linhas dos CSVs de origem, nao inventar dados, ler receita_brl como numero, entregaveis na raiz do repo.",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Join de vendas com lojas",
+      "description": "Como analista, quero as vendas enriquecidas com os dados da loja para poder agrupar por regiao.",
+      "acceptanceCriteria": [
+        "pipeline.py le vendas.csv e lojas.csv sem alterar os arquivos de origem",
+        "receita_brl e lido como float, nao como texto",
+        "Inner join por id_loja salvo em vendas_lojas.csv na raiz, mantendo a coluna receita_brl com esse nome",
+        "vendas_lojas.csv tem exatamente 420 linhas de dados e soma de receita_brl = 931274.06 (tolerancia 0.50)",
+        "As 3 vendas orfas (id_loja sem loja correspondente, id 999) sao salvas em vendas_orfas.csv, somando 8120.00",
+        "tests/test_pipeline.py testa linhas do join, receita total e as 3 orfas",
+        "python -m pytest -q passa"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-002",
+      "title": "Pivot receita por regiao x mes",
+      "description": "Como gestor, quero a receita mensal de cada regiao numa tabela.",
+      "acceptanceCriteria": [
+        "pivot_receita.csv na raiz com cabecalho exato: regiao,2026-01,2026-02,2026-03,2026-04,2026-05,2026-06",
+        "4 linhas de dados (Centro-Oeste, Nordeste, Sudeste, Sul) em ordem alfabetica, 7 colunas",
+        "Valores com ponto decimal e 2 casas, sem R$ e sem separador de milhar; arredondar so ao escrever o CSV",
+        "Soma de todas as celulas numericas = 931274.06 (tolerancia 0.50) e a linha Sudeste soma 265077.49",
+        "Testes de forma, cabecalho e total do pivot",
+        "python -m pytest -q passa"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-003",
+      "title": "Pagina com grafico e conclusao",
+      "description": "Como leitor do relatorio, quero ver a receita mensal por regiao num grafico e entender o que ficou de fora.",
+      "acceptanceCriteria": [
+        "index.html na raiz, gerado pelo pipeline a partir de pivot_receita.csv",
+        "Grafico Chart.js via CDN com um <canvas>, uma serie por regiao e os 6 meses no eixo X, dados embutidos no HTML",
+        "Um unico <p> de conclusao com pelo menos 300 caracteres que cite a regiao lider, informe que 3 vendas (R$ 8.120,00) com loja inexistente ficaram fora, e que a loja 108 (Batel/PR) nao teve vendas, entao o Sul aparece menor que a operacao real",
+        "Teste verifica que o HTML contem o canvas/Chart.js e o paragrafo com 300+ caracteres",
+        "python -m pytest -q passa com pelo menos 4 testes no total"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": ""
+    }
+  ]
+}
