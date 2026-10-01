@@ -8,6 +8,7 @@ Started: Wed Sep 30 21:45:10     2026
 - tests/test_pipeline.py usa fixture de modulo `saida` que roda pipeline.main(); novas saidas devem ser geradas por main()
 - id_loja e comparado como string (DictReader); receita_brl convertido para float em ler_vendas()
 - Rodar testes: `python -m pytest -q` na raiz (Python 3.13)
+- MESES (lista de "AAAA-MM") e PIVOT_RECEITA ficam em pipeline.py; pivotar() devolve dict regiao->mes->float sem arredondar (arredonda so em escrever_pivot)
 ---
 
 ## 2026-09-30 21:50 - US-001
@@ -16,4 +17,14 @@ Started: Wed Sep 30 21:45:10     2026
 - **Learnings for future iterations:**
   - Dados limpos: receita_brl ja vem com ponto decimal; loja 108 (Batel) nao tem vendas; soma bruta de vendas.csv = 939394.06
   - Para US-002/003, estender main() para gerar pivot_receita.csv e index.html a partir das juntas
+---
+
+## 2026-09-30 22:00 - US-002
+- pipeline.py: pivotar(juntas) + escrever_pivot() -> pivot_receita.csv (regiao x 2026-01..06, 2 casas, ordem alfabetica); main() gera o pivot
+- Testes: forma/cabecalho/formato dos valores e totais (931274.06; Sudeste 265077.49). 6 testes verdes
+- Files changed: pipeline.py, tests/test_pipeline.py, pivot_receita.csv, scripts/ralph/prd.json, scripts/ralph/progress.txt
+- **Learnings for future iterations:**
+  - Mes = v["data"][:7]; 70 vendas por mes no join
+  - Totais por regiao: Sudeste 265077.49 (lider), Nordeste ~261862.76, Centro-Oeste ~258323.97, Sul ~146009.84
+  - Para US-003, index.html pode ler pivot_receita.csv (criterio exige gerar a partir dele) depois de escrever_pivot em main()
 ---

@@ -1,4 +1,4 @@
-"""Pipeline de vendas: join de vendas.csv com lojas.csv."""
+"""Pipeline de vendas: join de vendas.csv com lojas.csv e pivot regiao x mes."""
 import csv
 from pathlib import Path
 
@@ -7,6 +7,8 @@ VENDAS = RAIZ / "vendas.csv"
 LOJAS = RAIZ / "lojas.csv"
 VENDAS_LOJAS = RAIZ / "vendas_lojas.csv"
 VENDAS_ORFAS = RAIZ / "vendas_orfas.csv"
+PIVOT_RECEITA = RAIZ / "pivot_receita.csv"
+MESES = ["2026-01", "2026-02", "2026-03", "2026-04", "2026-05", "2026-06"]
 
 
 def ler_csv(caminho):
@@ -44,6 +46,23 @@ def escrever_csv(caminho, linhas, colunas):
         w.writerows(linhas)
 
 
+def pivotar(juntas):
+    """Receita por regiao x mes (floats sem arredondar), regioes em ordem alfabetica."""
+    regioes = sorted({v["regiao"] for v in juntas})
+    pivot = {r: {m: 0.0 for m in MESES} for r in regioes}
+    for v in juntas:
+        pivot[v["regiao"]][v["data"][:7]] += v["receita_brl"]
+    return pivot
+
+
+def escrever_pivot(caminho, pivot):
+    with open(caminho, "w", newline="", encoding="utf-8") as f:
+        w = csv.writer(f)
+        w.writerow(["regiao"] + MESES)
+        for regiao, meses in pivot.items():
+            w.writerow([regiao] + [f"{meses[m]:.2f}" for m in MESES])
+
+
 def main():
     vendas = ler_vendas()
     lojas = ler_lojas()
@@ -52,6 +71,7 @@ def main():
     colunas_lojas = [c for c in next(iter(lojas.values())).keys() if c != "id_loja"]
     escrever_csv(VENDAS_LOJAS, juntas, colunas_vendas + colunas_lojas)
     escrever_csv(VENDAS_ORFAS, orfas, colunas_vendas)
+    escrever_pivot(PIVOT_RECEITA, pivotar(juntas))
     return juntas, orfas
 
 
