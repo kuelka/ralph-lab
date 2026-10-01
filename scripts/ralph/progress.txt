@@ -1,0 +1,19 @@
+# Ralph Progress Log
+Started: Wed Sep 30 21:45:10     2026
+---
+
+## Codebase Patterns
+- Pipeline e stdlib pura (csv), sem pandas: pipeline.py na raiz, `python pipeline.py` gera os entregaveis na raiz
+- Caminhos ficam em constantes no topo de pipeline.py (VENDAS_LOJAS, VENDAS_ORFAS...); testes usam essas constantes
+- tests/test_pipeline.py usa fixture de modulo `saida` que roda pipeline.main(); novas saidas devem ser geradas por main()
+- id_loja e comparado como string (DictReader); receita_brl convertido para float em ler_vendas()
+- Rodar testes: `python -m pytest -q` na raiz (Python 3.13)
+---
+
+## 2026-09-30 21:50 - US-001
+- Implementado pipeline.py: le vendas/lojas, inner join por id_loja -> vendas_lojas.csv (420 linhas, 931274.06), orfas -> vendas_orfas.csv (3 linhas id 999, 8120.00)
+- Files changed: pipeline.py, tests/test_pipeline.py, vendas_lojas.csv, vendas_orfas.csv, .gitignore, scripts/ralph/prd.json
+- **Learnings for future iterations:**
+  - Dados limpos: receita_brl ja vem com ponto decimal; loja 108 (Batel) nao tem vendas; soma bruta de vendas.csv = 939394.06
+  - Para US-002/003, estender main() para gerar pivot_receita.csv e index.html a partir das juntas
+---
