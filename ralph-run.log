@@ -1,0 +1,50 @@
+Starting Ralph - Tool: claude - Max iterations: 10
+
+===============================================================
+  Ralph Iteration 1 of 10 (claude)
+===============================================================
+US-001 (Join de vendas com lojas) is finished and committed on `main` as `f6acaf4`. The 4 tests pass with `python -m pytest -q`.
+
+- **`pipeline.py`**: reads `vendas.csv` and `lojas.csv`, joins them on `id_loja` and converts `receita_brl` to a number. It uses only Python's built-in `csv` module, no pandas.
+- **`vendas_lojas.csv`**: 420 rows with total revenue 931274.06, which matches the target.
+- **`vendas_orfas.csv`**: the 3 sales from shop 999, which isn't in `lojas.csv`, totalling 8120.00.
+- **`tests/test_pipeline.py`**: checks the row count, the total revenue, that revenue is read as a number, and the 3 orphan sales.
+- **Source CSVs**: `vendas.csv` and `lojas.csv` were not modified; `git status` shows no changes to them.
+
+I also added a `.gitignore` for the Python cache folders and `ralph-run.log`, set US-001 to `passes: true` in `prd.json`, and added a "Codebase Patterns" section to `progress.txt` for the next iterations.
+
+The commit also includes `scripts/ralph/progress.txt` and `scripts/ralph/.last-branch`, which were untracked before.
+
+Two facts about the data will matter later: shop 108 (Batel/PR) has no sales at all, and `vendas.csv` totals 939394.06 before the join drops the orphan sales.
+
+US-002 (the region × month table) and US-003 (the chart page) are still open for the next iterations.
+Iteration 1 complete. Continuing...
+
+===============================================================
+  Ralph Iteration 2 of 10 (claude)
+===============================================================
+I finished US-002 (the revenue table by region and month) and committed it to `main` as `aece0b6`. All 6 tests pass with `python -m pytest -q`.
+
+- **`pipeline.py`**: now also writes `pivot_receita.csv`. It has the exact header `regiao,2026-01,…,2026-06` and one row each for Centro-Oeste, Nordeste, Sudeste and Sul, in alphabetical order. Values have 2 decimal places and are only rounded when the file is written.
+- **Totals**: every cell adds up to 931274.06, and the Sudeste row adds up to 265077.49, which makes it the leading region.
+- **`tests/test_pipeline.py`**: two new tests check the header, the row order, the value format and both totals.
+- **Ralph files**: `scripts/ralph/prd.json` now marks US-002 as `passes: true`. I added a pattern and a progress entry to `scripts/ralph/progress.txt`. Both files went into the same commit.
+
+US-003 (the `index.html` page with the Chart.js chart and the conclusion paragraph) is still open for the next iteration.
+Iteration 2 complete. Continuing...
+
+===============================================================
+  Ralph Iteration 3 of 10 (claude)
+===============================================================
+US-003 is done and committed as `41ade3c` on `main`, so all three stories in the PRD now have `passes: true`.
+
+- **What it does:** running `python pipeline.py` now also produces `index.html`, built from `pivot_receita.csv`. It has a Chart.js line chart loaded from a CDN, with one line per region across the 6 months and the data written into the page.
+- **Conclusion paragraph:** a single `<p>` of about 380 characters. It names Sudeste as the leader with R$ 265.077,49, says the 3 sales (R$ 8.120,00) with the nonexistent store 999 were left out, and says store 108 (Batel/PR) had no sales, so Sul looks smaller than the real operation. Every figure is calculated from the CSVs, not typed in.
+- **Tests:** I added one test that checks for the canvas, the Chart.js reference and the paragraph's content. `python -m pytest -q` passes all 7 tests.
+- **Not checked:** I haven't opened the page in a browser because I had no browser tool here, so it still needs a quick look to confirm the chart actually draws.
+- **Other files:** the PRD and `progress.txt` are updated. `scripts/ralph/CLAUDE.md` is unchanged because nothing came up that would help future work.
+
+<promise>COMPLETE</promise>
+
+Ralph completed all tasks!
+Completed at iteration 3 of 10
